@@ -7,8 +7,6 @@
 #  [x] 允许查询某个 target 下的最近20条流水线记录
 #  [x] Erda OpenAPI Session 过期后自动续期
 # Description: 创建 Erda 流水线并执行，同时可以查询流水线执行结果
-# Note:
-#   curl -X POST 'https://openapi.erda.cloud/login?username=username&password=password'
 
 use common.nu [has-ref hr-line log]
 
@@ -65,10 +63,6 @@ def query-cicd [aid: int, appName: string, branch: string, erdaEnv: string, pipe
 
   # Query the id of newly created CICD
   mut ci = (curl --silent -H $auth $cicdUrl | from json)
-  # Check session expired, and renew if needed
-  if ($ci | describe) == 'string' and ($ci =~ 'auth failed') {
-    $ci = (curl --silent -H $auth $cicdUrl | from json)
-  }
   # log 'Query CICD: ' ($ci.data.pipelines | select id commit status | table -e)
   if ($ci | describe) == 'string' or ($ci | is-empty) {
     print $'Query CICD failed in query-cicd with message: (ansi r)($ci)(ansi reset)'; exit 1
@@ -168,10 +162,6 @@ def create-cicd [aid: int, appName: string, branch: string, pipeline: string, --
 
   # Query the ID of newly created CICD
   mut ci = (curl --silent -H $auth --data-raw $'($cicd | to json)' $cicdUrl | from json)
-  # Check session expired, and renew if needed
-  if ($ci | describe) == 'string' and ($ci =~ 'auth failed') {
-    $ci = (curl --silent -H $auth --data-raw $'($cicd | to json)' $cicdUrl | from json)
-  }
   if ($ci | describe) == 'string' { print $'Initialize CICD failed with message: (ansi r)($ci)(ansi reset)'; exit 1 }
   if $ci.success { print $'(ansi g)Initialize CICD successfully...(ansi reset)'; return $ci.data.id }
   print $'(ansi r)Initialize CICD failed, Please try again ...(ansi reset)'
@@ -184,10 +174,6 @@ def run-cicd [id: int, appid: int, pid: int, --auth: string] {
   let runUrl = $'($ERDA_HOST)/api/terminus/cicds/($id)/actions/run'
   mut run = (curl --silent -H $auth -X POST $runUrl | from json)
   let url = $'($ERDA_HOST)/terminus/dop/projects/($pid)/apps/($appid)/pipeline/obsoleted?pipelineID=($id)'
-  # Check session expired, and renew if needed
-  if ($run | describe) == 'string' and ($run =~ 'auth failed') {
-    $run = (curl --silent -H $auth -X POST $runUrl | from json)
-  }
   if $run.success {
     print $'CICD started, You can query the pipeline running status with id: (ansi g)($id)(ansi reset)'
     print $'Or visit ($url) for more details'
@@ -199,10 +185,6 @@ def query-cicd-by-id [id: int, --auth: string] {
   let queryUrl = $'($ERDA_HOST)/api/terminus/pipelines/($id)'
   mut query = (curl --silent -H $auth $queryUrl | from json)
 
-  # Check session expired, and renew if needed
-  if ($query | describe) == 'string' and ($query =~ 'auth failed') {
-    $query = (curl --silent -H $auth $queryUrl | from json)
-  }
   if ($query | describe) == 'string' { print $'Query CICD by id failed with message: (ansi r)($query)(ansi reset)'; exit 1 }
   if (not $query.success ) { print $'Query CICD failed with error message: (ansi r)($query.err.msg)(ansi reset)'; exit 1 }
   let timeEnd = if ($query.data.timeEnd | is-empty) { $'(ansi wd)---Not Yet!---(ansi reset)' } else { $query.data.timeEnd }

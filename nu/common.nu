@@ -23,36 +23,6 @@ export def 'get-env' [
   $env | get -i $key | default $default
 }
 
-# Get the specified config from `termix.toml` by key
-export def 'get-conf' [
-  key: string       # The key to get it's value from termix.toml
-  default?: any     # The default value for an empty conf
-] {
-  # books.toml config file path
-  let _SHARE_CONF = ([$env.SHARE_NU_DIR 'share.toml'] | path join)
-  let result = (open $_SHARE_CONF | get $key)
-  if ($result | is-empty) { $default } else { $result }
-}
-
-# Get TERMIX_TMP_PATH from env first and fallback to HOME/.termix-nu
-export def get-tmp-path [] {
-  # let homeEnv = if (windows?) { 'USERPROFILE' } else { 'HOME' }
-  let DEFAULT_TMP = [$nu.home-path '.termix-nu'] | path join
-  # 先从环境变量里面查找临时文件路径
-  let tmpDir = (get-env TERMIX_TMP_PATH '')
-  # 如果环境变量里面没有配置临时文件路径，则使用 HOME 目录下的 .termix 目录
-  let tmpPath = if ($tmpDir | is-empty) {
-    if not ($DEFAULT_TMP | path exists) { mkdir $DEFAULT_TMP }
-    $DEFAULT_TMP
-  } else { $tmpDir }
-  if not ($tmpPath | path exists) {
-    print $'(ansi r)Path ($tmpPath) does not exist, please create it and try again...(ansi reset)(char nl)(char nl)'
-    exit 3
-  }
-  # print $'Using (ansi g)($tmpPath)(ansi reset) as the temporary directory...(char nl)'
-  $tmpPath
-}
-
 # Check if a git repo has the specified ref: could be a branch or tag, etc.
 export def has-ref [
   ref: string   # The git ref to check
@@ -121,12 +91,4 @@ export def hr-line [
 ] {
   print $'(ansi $color)(build-line $width)(if $with_arrow {'>'})(ansi reset)'
   if $blank_line { char nl }
-}
-
-
-# parallel { print "Oh" } { print "Ah" } { print "Eeh" }
-export def parallel [...closures] {
-  $closures | par-each {
-    |c| do $c
-  }
 }
