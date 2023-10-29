@@ -251,7 +251,7 @@ export def main [
       let appName = $app.appName
       # 检查是否有正在执行的流水线以及是否该 Commit 已经部署过
       if not $force {
-        if not (check-cicd $appid $appName $branch $app.environment $app.pipeline --auth $auth) { continue }
+        if not (check-cicd $appid $appName $branch $app.environment $app.pipeline --auth $auth) { return }
       }
       let cicdid = (create-cicd $appid $appName $branch $app.pipeline --auth $auth)
       run-cicd ($cicdid | into int) $appid $pid --auth $auth
