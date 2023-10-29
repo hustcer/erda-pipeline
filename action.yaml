@@ -1,0 +1,68 @@
+# Erda Pipeline Action
+#   @author: hustcer
+#   @created: 2023/10/29 18:50:20
+# REF:
+#   - https://docs.github.com/cn/actions/creating-actions/about-custom-actions
+#   - https://docs.github.com/cn/actions/creating-actions/metadata-syntax-for-github-actions
+#   - https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+
+name: 'Erda Pipeline'
+author: 'hustcer'
+description: 'A github action to run, query or stop Erda Pipelines'
+
+branding:
+  icon: 'framer'
+  color: 'purple'
+
+inputs:
+  pid:
+    required: true
+    description: 'Erda Project ID.'
+  app-id:
+    required: true
+    description: 'Erda App ID.'
+  app-name:
+    required: true
+    description: 'Erda App Name.'
+  environment:
+    required: false
+    description: 'Erda environment: should be TEST, DEV, PROD or STAGING.'
+  branch:
+    required: true
+    description: 'The Erda branch to handle the pipeline.'
+  pipeline:
+    required: true
+    default: 'pipeline.yml'
+    description: 'Enable registering of plugins'
+  description:
+    required: false
+    description: 'The description of the pipeline.'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Nu
+      uses: hustcer/setup-nu@v3.7
+      with:
+        version: 0.86
+    - name: Setup Erda
+      shell: nu {0}
+      run: |
+        version
+        print 'Preparing Running Erda Pipeline...'
+        let pid = ${{ inputs.pid }}
+        let appId = ${{ inputs.app-id }}
+        let branch = ${{ inputs.branch }}
+        let appName = ${{ inputs.app-name }}
+        let pipeline = ${{ inputs.pipeline }}
+        let environment = ${{ inputs.environment }}
+        let description = ${{ inputs.description }}
+        print {
+          pid: pid,
+          appId: appId,
+          branch: branch,
+          appName: appName,
+          pipeline: pipeline,
+          environment: environment,
+          description: description
+        }
