@@ -65,6 +65,27 @@ export def is-lower-ver [
   (compare-ver $from $to) == false
 }
 
+# Check if git was installed and if current directory is a git repo
+export def git-check [
+  dest: string,        # The dest dir to check
+  --check-repo: int,   # Check if current directory is a git repo
+] {
+  cd $dest
+  let isGitInstalled = (which git | length) > 0
+  if (not $isGitInstalled) {
+    print $'You should (ansi r)INSTALL git(ansi reset) first to run this command, bye...'
+    exit 2
+  }
+  # If we don't need repo check just quit now
+  if ($check_repo != 0) {
+    let checkRepo = (do -i { git rev-parse --is-inside-work-tree } | complete)
+    if not ($checkRepo.stdout =~ 'true') {
+      print $'Current directory is (ansi r)NOT(ansi reset) a git repo, bye...(char nl)'
+      exit 5
+    }
+  }
+}
+
 # Create a line by repeating the unit with specified times
 def build-line [
   times: int,
