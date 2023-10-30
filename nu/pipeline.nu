@@ -7,6 +7,8 @@
 #  [x] 允许查询某个 target 下的最近20条流水线记录
 #  [x] Erda OpenAPI Session 过期后自动续期
 #  [x] 自动根据分支名称推断目标环境是属于 DEV, TEST, STAGING 还是 PROD
+#  [ ] 允许停止正在执行的流水线
+#  [ ] 非ID方式查询流水线分页结果时自动输出正在执行的所有流水线的详细信息
 # Description: 创建 Erda 流水线并执行，同时可以查询流水线执行结果
 
 use common.nu [has-ref hr-line log]
@@ -48,7 +50,10 @@ export def get-auth [] {
   print 'Renewing Erda session...'
   let query = { username: $env.ERDA_USERNAME, password: $env.ERDA_PASSWORD } | url build-query
   let RENEW_URL = $'https://openapi.erda.cloud/login?($query)'
-  let renew = curl --silent -X POST $RENEW_URL | from json
+  mut renew = (curl --silent -X POST $RENEW_URL | from json)
+  if ($renew | is-empty) {
+    $renew = (curl --silent -X POST $RENEW_URL | from json)
+  }
   if ($renew | describe) == 'string' {
     print $'Erda session renew failed with message: (ansi r)($renew)(ansi reset)'; exit 8
   }
