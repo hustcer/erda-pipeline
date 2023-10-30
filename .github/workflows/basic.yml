@@ -22,10 +22,8 @@ jobs:
           pid: 213
           app-id: 7542
           app-name: 'Fe-Docs'
-          environment: 'DEV'
           branch: 'feature/latest'
           pipeline: 'pipeline.yml'
-          description: '前端文档开发环境'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ERDA_USERNAME: ${{ secrets.ERDA_USERNAME }}

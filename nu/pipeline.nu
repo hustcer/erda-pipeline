@@ -6,6 +6,7 @@
 #  [x] 执行新流水线之前可以查询同一 Commit 是否已经被部署过，如果部署过则停止执行，也可以加上 `-f` 强制执行
 #  [x] 允许查询某个 target 下的最近20条流水线记录
 #  [x] Erda OpenAPI Session 过期后自动续期
+#  [x] 自动根据分支名称推断目标环境是属于 DEV, TEST, STAGING 还是 PROD
 # Description: 创建 Erda 流水线并执行，同时可以查询流水线执行结果
 
 use common.nu [has-ref hr-line log]
@@ -16,6 +17,19 @@ const ERDA_HOST = 'https://erda.cloud'
 export-env {
   # FIXME: 去除前导空格背景色
   $env.config.color_config.leading_trailing_space_bg = { attr: n }
+}
+
+# 根据分支名称推断目标环境是属于 DEV, TEST, STAGING 还是 PROD
+def get-env-from-branch [branch: string] {
+  let branch = $branch | str trim | str downcase
+  if $branch =~ 'hotfix/' { return 'DEV' }
+  if $branch =~ 'feature/' { return 'DEV' }
+  if $branch == 'develop' { return 'TEST' }
+  if $branch == 'master' { return 'PROD' }
+  if $branch =~ 'support/' { return 'PROD' }
+  if $branch =~ 'sprint/' { return 'STAGING' }
+  if $branch =~ 'release/' { return 'STAGING' }
+  return 'DEV'
 }
 
 # Check if the required environment variable was set, quit if not
@@ -43,7 +57,7 @@ export def get-auth [] {
 
 # Check if the pipeline config was set correctly, quit if not
 def check-pipeline-conf [conf: any] {
-  let keys = ['pid', 'appId', 'branch', 'environment', 'appName', 'pipeline']
+  let keys = ['pid', 'appId', 'branch', 'appName', 'pipeline']
 
   let empties = ($keys | filter {|it| $conf | get -i $it | is-empty })
   if ($empties | length) > 0 {
@@ -111,10 +125,11 @@ def get-pipeline-url [--as-raw-string] {
 # 查询指定目标上最新的N条流水线执行结果
 def query-latest-cicd [pipeline: record, --auth: string] {
   let app = $pipeline
+  let environment = get-env-from-branch $app.branch
   check-envs
 
   echo $'Querying latest CICDs for (ansi pb)($app.appName) on ($app.branch)(ansi reset) branch:'; hr-line -c pb
-  let ci = (query-cicd $app.appId $app.appName $app.branch $app.environment $app.pipeline 10)
+  let ci = (query-cicd $app.appId $app.appName $app.branch $environment $app.pipeline 10)
   if ($ci.data.total == 0) {
     echo $'No CICD found for (ansi pb)($app.appName)(ansi reset) on (ansi g)($app.branch)(ansi reset) branch'; exit 0
   }
@@ -231,9 +246,10 @@ export def main [
       let appid = $app.appId
       let branch = $app.branch
       let appName = $app.appName
+      let environment = get-env-from-branch $branch
       # 检查是否有正在执行的流水线以及是否该 Commit 已经部署过
       if not $force {
-        if not (check-cicd $appid $appName $branch $app.environment $app.pipeline --auth $auth) { return }
+        if not (check-cicd $appid $appName $branch $environment $app.pipeline --auth $auth) { return }
       }
       let cicdid = (create-cicd $appid $appName $branch $app.pipeline --auth $auth)
       run-cicd ($cicdid | into int) $appid $pid --auth $auth

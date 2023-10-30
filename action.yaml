@@ -24,9 +24,6 @@ inputs:
   app-name:
     required: true
     description: 'Erda App Name.'
-  environment:
-    required: false
-    description: 'Erda environment: should be TEST, DEV, PROD or STAGING.'
   branch:
     required: true
     description: 'The Erda branch to handle the pipeline.'
@@ -34,9 +31,6 @@ inputs:
     required: true
     default: 'pipeline.yml'
     description: 'The Erda pipeline file to run.'
-  description:
-    required: false
-    description: 'The description of the pipeline.'
 
 runs:
   using: 'composite'
@@ -58,15 +52,11 @@ runs:
         let branch = '${{ inputs.branch }}'
         let appName = '${{ inputs.app-name }}'
         let pipeline = '${{ inputs.pipeline }}'
-        let environment = '${{ inputs.environment }}'
-        let description = '${{ inputs.description }}'
         let erdaConfig = {
           pid: $pid,
           appId: $appId,
           branch: $branch,
           appName: $appName,
           pipeline: $pipeline,
-          environment: $environment,
-          description: $description,
         }
         erda-deploy $erdaConfig --auth (get-auth)
