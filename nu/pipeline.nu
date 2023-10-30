@@ -22,6 +22,13 @@ export-env {
   $env.config.color_config.leading_trailing_space_bg = { attr: n }
 }
 
+# 判断是否需要重试，如果返回 true 则重试，否则不重试
+def should-retry [resp: any] {
+  let isEmpty = ($resp | is-empty)
+  let noAuth = ($resp | describe) == 'string' and ($resp =~ 'auth failed')
+  $isEmpty or $noAuth
+}
+
 # 根据分支名称推断目标环境是属于 DEV, TEST, STAGING 还是 PROD
 def get-env-from-branch [branch: string] {
   let branch = $branch | str trim | str downcase
@@ -84,7 +91,7 @@ def query-cicd [aid: int, appName: string, branch: string, erdaEnv: string, pipe
   # Query the id of newly created CICD
   mut ci = (curl --silent -H $auth $cicdUrl | from json)
   # Check session expired, and renew if needed
-  if ($ci | describe) == 'string' and ($ci =~ 'auth failed') {
+  if (should-retry $ci) {
     $ci = (curl --silent -H (get-auth) $cicdUrl | from json)
   }
   # log 'Query CICD: ' ($ci.data.pipelines | select id commit status | table -e)
@@ -194,7 +201,7 @@ def create-cicd [aid: int, appName: string, branch: string, pipeline: string, --
   # Query the ID of newly created CICD
   mut ci = (curl --silent -H $auth --data-raw $'($cicd | to json)' $cicdUrl | from json)
   # Check session expired, and renew if needed
-  if ($ci | describe) == 'string' and ($ci =~ 'auth failed') {
+  if (should-retry $ci) {
     $ci = (curl --silent -H (get-auth) --data-raw $'($cicd | to json)' $cicdUrl | from json)
   }
   if ($ci | describe) == 'string' { print $'Initialize CICD failed with message: (ansi r)($ci)(ansi reset)'; exit 1 }
@@ -210,7 +217,7 @@ def run-cicd [id: int, appid: int, pid: int, --auth: string] {
   mut run = (curl --silent -H $auth -X POST $runUrl | from json)
   let url = $'($ERDA_HOST)/terminus/dop/projects/($pid)/apps/($appid)/pipeline/obsoleted?pipelineID=($id)'
   # Check session expired, and renew if needed
-  if ($run | describe) == 'string' and ($run =~ 'auth failed') {
+  if (should-retry $run) {
     $run = (curl --silent -H (get-auth) -X POST $runUrl | from json)
   }
   if $run.success {
@@ -225,7 +232,7 @@ def query-cicd-by-id [id: int, --auth: string] {
   mut query = (curl --silent -H $auth $queryUrl | from json)
 
   # Check session expired, and renew if needed
-  if ($query | describe) == 'string' and ($query =~ 'auth failed') {
+  if (should-retry $query) {
     $query = (curl --silent -H (get-auth) $queryUrl | from json)
   }
   if ($query | describe) == 'string' { print $'Query CICD by id failed with message: (ansi r)($query)(ansi reset)'; exit 1 }
