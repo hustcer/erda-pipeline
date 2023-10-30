@@ -7,8 +7,8 @@
 #  [x] 允许查询某个 target 下的最近20条流水线记录
 #  [x] Erda OpenAPI Session 过期后自动续期
 #  [x] 自动根据分支名称推断目标环境是属于 DEV, TEST, STAGING 还是 PROD
+#  [x] 非ID方式查询流水线分页结果时自动输出正在执行的所有流水线的详细信息
 #  [ ] 允许停止正在执行的流水线
-#  [ ] 非ID方式查询流水线分页结果时自动输出正在执行的所有流水线的详细信息
 # Description: 创建 Erda 流水线并执行，同时可以查询流水线执行结果
 
 use common.nu [has-ref hr-line log]
@@ -17,6 +17,7 @@ const NA = 'N/A'
 const ERDA_HOST = 'https://erda.cloud'
 
 export-env {
+  $env.config.table.mode = 'light'
   # FIXME: 去除前导空格背景色
   $env.config.color_config.leading_trailing_space_bg = { attr: n }
 }
@@ -132,7 +133,7 @@ def get-pipeline-url [--as-raw-string] {
 }
 
 # 查询指定目标上最新的N条流水线执行结果
-def query-latest-cicd [pipeline: record, --auth: string] {
+def query-latest-cicd [pipeline: record, --auth: string, --show-running-detail] {
   let app = $pipeline
   let environment = get-env-from-branch $app.branch
   check-envs
@@ -147,6 +148,13 @@ def query-latest-cicd [pipeline: record, --auth: string] {
   echo 'URL of the latest pipeline:'; hr-line
   echo ($ci.data.pipelines | first | get-pipeline-url --as-raw-string)
   echo (char nl)
+  if ($show_running_detail) {
+    echo $'Detail of running pipelines:'; hr-line
+    $ci.data.pipelines
+      | where status == 'Running'
+      | get ID
+      | each {|it| query-cicd-by-id $it --auth $auth }
+  }
 }
 
 # 检查是否有正在执行的流水线，如果有则显示其概要信息并退出
@@ -280,7 +288,7 @@ export def main [
       # 未指定 cid 则查询最近 10 条流水线执行结果
       if ($cid | is-empty) {
         check-pipeline-conf $pipeline
-        query-latest-cicd $pipeline --auth $auth; exit 0
+        query-latest-cicd $pipeline --auth $auth --show-running-detail; exit 0
       }
       if ($cid | describe) != 'int' {
         print $'Invalid value for --cid: (ansi r)($cid)(ansi reset), should be an integer number.'; exit 1
