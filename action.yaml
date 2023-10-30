@@ -15,22 +15,26 @@ branding:
   color: 'purple'
 
 inputs:
+  action:
+    required: true
+    default: 'run'
+    description: 'The action to do with the Erda Pipelines, could be `run`, `query` or `cancel`.'
   pid:
     required: true
-    description: 'Erda Project ID.'
+    description: 'Erda project id of the pipeline to handle.'
   app-id:
     required: true
-    description: 'Erda App ID.'
+    description: 'Erda app id of the pipeline to handle.'
   app-name:
     required: true
-    description: 'Erda App Name.'
+    description: 'Erda app name of the pipeline to handle.'
   branch:
     required: true
-    description: 'The Erda branch to handle the pipeline.'
+    description: 'The Erda branch name of the pipeline to handle.'
   pipeline:
     required: true
     default: 'pipeline.yml'
-    description: 'The Erda pipeline file to run.'
+    description: 'The Erda pipeline file to handle.'
 
 runs:
   using: 'composite'
@@ -46,7 +50,8 @@ runs:
         use ${{ github.workspace }}/nu/pipeline.nu *
 
         version | print
-        print 'Preparing Running Erda Pipeline with the Following Config...'
+        let auth = (get-auth)
+        let action = '${{ inputs.action }}'
         let pid = ${{ inputs.pid }}
         let appId = ${{ inputs.app-id }}
         let branch = '${{ inputs.branch }}'
@@ -59,4 +64,16 @@ runs:
           appName: $appName,
           pipeline: $pipeline,
         }
-        erda-deploy $erdaConfig --auth (get-auth)
+        match $action {
+          'query' => 'Querying Erda pipeline with the following config...',
+          'cancel' => 'Cancelling Erda pipeline with the following config...',
+          'run' => 'Preparing running Erda pipeline with the following config...',
+          _ => $'Unsupported action: ($action)'
+        } | print
+        $erdaConfig | print
+        match $action {
+          'run' => { erda-deploy $erdaConfig --auth $auth },
+          'query' => { erda-query $erdaConfig --auth $auth },
+          _ => { print $'Unsupported action: ($action)' },
+        }
+

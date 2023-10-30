@@ -129,7 +129,7 @@ def query-latest-cicd [pipeline: record, --auth: string] {
   check-envs
 
   echo $'Querying latest CICDs for (ansi pb)($app.appName) on ($app.branch)(ansi reset) branch:'; hr-line -c pb
-  let ci = (query-cicd $app.appId $app.appName $app.branch $environment $app.pipeline 10)
+  let ci = (query-cicd $app.appId $app.appName $app.branch $environment $app.pipeline 10 --auth $auth)
   if ($ci.data.total == 0) {
     echo $'No CICD found for (ansi pb)($app.appName)(ansi reset) on (ansi g)($app.branch)(ansi reset) branch'; exit 0
   }

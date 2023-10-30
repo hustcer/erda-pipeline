@@ -12,13 +12,37 @@ on:
 jobs:
   Run-Pipeline:
     runs-on: ubuntu-latest
+    name: Run fe-docs@feature/latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.0
 
-      - name: Run Pipeline
+      - name: Run Erda Pipeline
         uses: hustcer/erda-pipeline@develop
         with:
+          action: 'run'
+          pid: 213
+          app-id: 7542
+          app-name: 'Fe-Docs'
+          branch: 'feature/latest'
+          pipeline: 'pipeline.yml'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ERDA_USERNAME: ${{ secrets.ERDA_USERNAME }}
+          ERDA_PASSWORD: ${{ secrets.ERDA_PASSWORD }}
+
+  Query-Pipeline:
+    needs: Run-Pipeline
+    runs-on: ubuntu-latest
+    name: Query fe-docs@feature/latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.0
+
+      - name: Query Erda Pipeline
+        uses: hustcer/erda-pipeline@develop
+        with:
+          action: 'query'
           pid: 213
           app-id: 7542
           app-name: 'Fe-Docs'
