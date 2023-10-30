@@ -3,7 +3,7 @@
 # REF:
 #   - https://github.com/marketplace/actions/checkout
 
-name: Test-Erda-Pipeline@DEV
+name: Test-Erda-Pipeline@TEST
 on:
   push:
     branches:
@@ -12,19 +12,19 @@ on:
 jobs:
   Run-Pipeline:
     runs-on: ubuntu-latest
-    name: Run fe-docs@feature/latest
+    name: Run fe-docs@develop
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.0
 
       - name: Run Erda Pipeline
-        uses: hustcer/erda-pipeline@develop
+        uses: hustcer/erda-pipeline@v1
         with:
           action: 'run'
           pid: 213
           app-id: 7542
           app-name: 'Fe-Docs'
-          branch: 'feature/latest'
+          branch: 'develop'
           pipeline: 'pipeline.yml'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -34,19 +34,19 @@ jobs:
   Query-Pipeline:
     needs: Run-Pipeline
     runs-on: ubuntu-latest
-    name: Query fe-docs@feature/latest
+    name: Query fe-docs@develop
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.0
 
       - name: Query Erda Pipeline
-        uses: hustcer/erda-pipeline@develop
+        uses: hustcer/erda-pipeline@v1
         with:
           action: 'query'
           pid: 213
           app-id: 7542
           app-name: 'Fe-Docs'
-          branch: 'feature/latest'
+          branch: 'develop'
           pipeline: 'pipeline.yml'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
