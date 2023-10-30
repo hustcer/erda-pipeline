@@ -12,13 +12,6 @@ All notable changes to this project will be documented in this file.
 - Add .github/workflows/test.yml
 - Show more detail of running pipelines
 
-### Miscellaneous Tasks
-
-- Change action icon
-
-# Changelog
-All notable changes to this project will be documented in this file.
-
 ## [1.0.0] - 2023-10-30
 
 ### Features
