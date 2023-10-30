@@ -17,7 +17,7 @@ const NA = 'N/A'
 const ERDA_HOST = 'https://erda.cloud'
 
 export-env {
-  $env.config.table.mode = 'light'
+  # $env.config.table.mode = 'light'
   # FIXME: 去除前导空格背景色
   $env.config.color_config.leading_trailing_space_bg = { attr: n }
 }
@@ -149,11 +149,10 @@ def query-latest-cicd [pipeline: record, --auth: string, --show-running-detail] 
   echo ($ci.data.pipelines | first | get-pipeline-url --as-raw-string)
   echo (char nl)
   if ($show_running_detail) {
+    let running = $ci.data.pipelines | where status == 'Running'
+    if ($running | length) == 0 { return }
     echo $'Detail of running pipelines:'; hr-line
-    $ci.data.pipelines
-      | where status == 'Running'
-      | get ID
-      | each {|it| query-cicd-by-id $it --auth $auth }
+    $running | get ID | each {|it| query-cicd-by-id $it --auth $auth }
   }
 }
 
