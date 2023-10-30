@@ -62,7 +62,7 @@ release updateLog=('false'):
   @overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'common.nu') }}; \
     overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'release.nu') }}; \
     git-check --check-repo=1 {{ERDA_PIPELINE_PATH}}; \
-    make-release --update-log={{updateLog}}
+    make-release --update-log {{updateLog}}
 
 # Plugins need to be registered only once after nu v0.61
 _setup:

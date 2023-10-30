@@ -12,11 +12,11 @@
 #   Change `version` in meta.json and then run: `just release` OR `just release true`
 
 export def 'make-release' [
-  --update-log(-u)  # Set to `true` do enable updating CHANGELOG.md
+  --update-log(-u): bool    # Set to `true` do enable updating CHANGELOG.md
 ] {
 
   cd $env.ERDA_PIPELINE_PATH
-  let releaseVer = (open meta.json | get version)
+  let releaseVer = (open meta.json | get actionVer)
 
   if (has-ref $releaseVer) {
   	print $'The version ($releaseVer) already exists, Please choose another version.(char nl)'
