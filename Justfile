@@ -22,6 +22,7 @@ set positional-arguments := true
 
 # Just commands aliases
 alias r := run
+alias q := query
 
 # Use `just --evaluate` to show env vars
 
@@ -38,15 +39,25 @@ _query_plugin := if os_family() == 'windows' { 'nu_plugin_query.exe' } else { 'n
 default:
   @just --list --list-prefix "··· "
 
-# Test action locally
+# Test run erda pipeline locally
 run:
   @$'(ansi g)Start `run` task...(ansi reset)'; \
   cd {{ERDA_PIPELINE_PATH}}; \
-  $env.RUNNER_TEMP = './runner/temp'; \
-  $env.RUNNER_TOOL_CACHE = './runner/cache'; \
-  nu nu/main.nu
+  overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'pipeline.nu') }}; \
+  let auth = (get-auth); \
+  let args = { action: 'run', pid: 213, appId: 7542, appName: 'Fe-Docs', branch: 'feature/latest', pipeline: 'pipeline.yml' }; \
+  erda-deploy $args --auth $auth
 
-# Release a new version for `setup-nu`
+# Test query erda pipeline locally
+query:
+  @$'(ansi g)Start `query` task...(ansi reset)'; \
+  cd {{ERDA_PIPELINE_PATH}}; \
+  overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'pipeline.nu') }}; \
+  let auth = (get-auth); \
+  let args = { action: 'run', pid: 213, appId: 7542, appName: 'Fe-Docs', branch: 'feature/latest', pipeline: 'pipeline.yml' }; \
+  erda-query $args --auth $auth
+
+# Release a new version for `erda-pipeline`
 release updateLog=('false'):
   @overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'common.nu') }}; \
     overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'release.nu') }}; \
