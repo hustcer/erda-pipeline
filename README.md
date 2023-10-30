@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4.1.0
 
       - name: Run Erda Pipeline
-        uses: hustcer/erda-pipeline@v1
+        uses: hustcer/erda-pipeline@v1.1
         with:
           action: "run" # 打算对流水线执行的操作目前可以为：run & query, 未来可能会添加 cancel 支持
           pid: 213 # Project ID，可以从应用的 URL 链接里面获取
@@ -67,7 +67,7 @@ jobs:
         uses: actions/checkout@v4.1.0
 
       - name: Run Erda Pipeline
-        uses: hustcer/erda-pipeline@v1
+        uses: hustcer/erda-pipeline@v1.1
         with:
           action: "query" # 打算对流水线执行的操作目前可以为：run & query, 未来可能会添加 cancel 支持
           pid: 213 # Project ID，可以从应用的 URL 链接里面获取
