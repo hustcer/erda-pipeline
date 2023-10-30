@@ -11,7 +11,7 @@ author: 'hustcer'
 description: 'A github action to run, query or stop Erda Pipelines'
 
 branding:
-  icon: 'framer'
+  icon: 'activity'
   color: 'purple'
 
 inputs:
