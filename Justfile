@@ -42,20 +42,20 @@ default:
 # Test run erda pipeline locally
 run:
   @$'(ansi g)Start `run` task...(ansi reset)'; \
-  cd {{ERDA_PIPELINE_PATH}}; \
-  overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'pipeline.nu') }}; \
-  let auth = (get-auth); \
-  let args = { action: 'run', pid: 213, appId: 7542, appName: 'Fe-Docs', branch: 'feature/latest', pipeline: 'pipeline.yml' }; \
-  erda-deploy $args --auth $auth
+    cd {{ERDA_PIPELINE_PATH}}; \
+    overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'pipeline.nu') }}; \
+    let auth = (get-auth); \
+    let args = { action: 'run', pid: 213, appId: 7542, appName: 'Fe-Docs', branch: 'feature/latest', pipeline: 'pipeline.yml' }; \
+    erda-deploy $args --auth $auth
 
 # Test query erda pipeline locally
 query:
   @$'(ansi g)Start `query` task...(ansi reset)'; \
-  cd {{ERDA_PIPELINE_PATH}}; \
-  overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'pipeline.nu') }}; \
-  let auth = (get-auth); \
-  let args = { action: 'run', pid: 213, appId: 7542, appName: 'Fe-Docs', branch: 'feature/latest', pipeline: 'pipeline.yml' }; \
-  erda-query $args --auth $auth
+    cd {{ERDA_PIPELINE_PATH}}; \
+    overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'pipeline.nu') }}; \
+    let auth = (get-auth); \
+    let args = { action: 'run', pid: 213, appId: 7542, appName: 'Fe-Docs', branch: 'feature/latest', pipeline: 'pipeline.yml' }; \
+    erda-query $args --auth $auth
 
 # Release a new version for `erda-pipeline`
 release updateLog=('false'):
