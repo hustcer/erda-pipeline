@@ -1,6 +1,6 @@
 # Erda-Pipeline Action
 
-本 Github Action 通过 Github 的 Workflow 调用 [Nushell](https://github.com/nushell/nushell) 脚本然后再利用该脚本来执行或者查询 [Erda](https://erda.cloud/) 流水线。开发这个 Action 的初衷是为了解决无法在手机上执行 & 查看 Erda 流水线执行状态的问题，因为 Github 支持在手机上执行 Workflow，而 Erda 不支持在手机上进行类似操作。
+本 Github Action 通过 Github 的 Workflow 调用 [Nushell](https://github.com/nushell/nushell) 脚本然后再利用该脚本来执行或者查询 [Erda](https://erda.cloud/) 流水线。开发这个 Action 的初衷是为了解决无法在手机上执行 & 查看 Erda 流水线执行状态的问题，因为 Github 支持在手机上执行 Workflow，而 Erda 目前尚不支持。
 
 ## 使用说明
 
@@ -38,6 +38,8 @@ jobs:
           ERDA_PASSWORD: ${{ secrets.ERDA_PASSWORD }} # Erda 登陆密码
 ```
 
+参考示例: [Test.yml](https://github.com/hustcer/erda-pipeline/blob/main/.github/workflows/test.yml)
+
 > **Important**
 >
 > 1. 想要该流水线顺利运行你需要在应用 Setting --> Secrets and variables --> Actions --> New repository secret 里面添加两个 Secrets
@@ -45,7 +47,7 @@ jobs:
 > 2. 初次需要将该流水线设置为分支 push 的时候自动触发生成一条执行记录，之后就可以在手机端选择该执行记录然后重复执行该 Workflow 了，虽然后续执行
 >    的是同一条记录，但是由于 Nushell 脚本执行流水线的时候始终使用的是指定应用指定分支的最新代码所以不用担心 Erda 应用里最新代码没有生效的问题
 
-之后就可以在手机端通过 GitHub App 执行 Erda 的流水线了，执行结果可以查看 Github Action 的输出日志。
+之后就可以在手机端通过 GitHub App 执行 Erda 的流水线了，执行结果可以查看 Github Action 的输出日志, [输出示例](https://github.com/hustcer/erda-pipeline/actions/runs/6695125684/job/18207644662)。
 
 ### 查询流水线最近执行记录
 
@@ -81,13 +83,22 @@ jobs:
           ERDA_PASSWORD: ${{ secrets.ERDA_PASSWORD }} # Erda 登陆密码
 ```
 
+参考示例: [Test.yml](https://github.com/hustcer/erda-pipeline/blob/main/.github/workflows/test.yml)
+
 > **Important**
 >
 > 1. 想要该流水线顺利运行你需要在应用 Setting --> Secrets and variables --> Actions --> New repository secret 里面添加两个 Secrets
 >    命名分别为 `ERDA_USERNAME` & `ERDA_PASSWORD`, 并在其中填入 Erda 的登陆用户名和密码
 > 2. 初次需要将该流水线设置为分支 push 的时候自动触发生成一条执行记录，之后就可以在手机端选择该执行记录然后重复执行该 Workflow 了
 
-之后就可以在手机端通过 GitHub App 查询 Erda 的流水线的最近执行记录了，查询结果可以查看 Github Action 的输出日志。
+之后就可以在手机端通过 GitHub App 查询 Erda 的流水线的最近执行记录了，查询结果可以查看 Github Action 的输出日志, [输出示例](https://github.com/hustcer/erda-pipeline/actions/runs/6695125684/job/18207651324)。
+
+### 友情提示
+
+1. 你的代码仓库里面只需要有相应的 Github Workflow 即可，不需要将此仓库的脚本等加入进去；
+2. 示例中的代码 checkout 步骤通过 `uses: actions/checkout@v4.1.0` 完成，不过这仅适用于可公开访问的仓库，对于私有仓库需要指定仓库及私钥，参考[这里说明](https://github.com/actions/checkout#checkout-multiple-repos-private)；
+3. 建议在一个 Workflow 里面同时加入执行和查询的Job，这样只需要一个流水线即可完成两个操作，虽然Erda流水线的执行是异步的，查询的时候可能Erda 流水线尚未结束，但是 Github App 允许你单独启动指定的 Job，你可以在稍后重新单独执行下查询 Job 即可查看流水线的最新执行情况；
+
 
 ### 输入
 
