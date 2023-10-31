@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.2] - 2023-10-31
+
+### Bug Fixes
+
+- Try to fix empty response issue
+
+### Miscellaneous Tasks
+
+- Update erda-pipeline action in test workflow
+
 ## [1.1] - 2023-10-30
 
 ### Bug Fixes
