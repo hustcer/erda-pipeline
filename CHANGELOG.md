@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.3] - 2023-11-02
+
+### Bug Fixes
+
+- Fix Nu module import path error
+
 ## [1.2] - 2023-10-31
 
 ### Bug Fixes
