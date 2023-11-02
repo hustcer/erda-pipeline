@@ -47,7 +47,7 @@ runs:
     - name: Setup Erda
       shell: nu {0}
       run: |
-        use ${{ github.workspace }}/nu/pipeline.nu *
+        use ${{ github.action_path }}/nu/pipeline.nu *
 
         version | print
         let auth = (get-auth)
