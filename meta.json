@@ -5,6 +5,6 @@
     "author": "hustcer",
     "license": "MIT",
     "github": "https://github.com/hustcer/erda-pipeline",
-    "home": "https://github.com/marketplace/actions/erda-piepeline",
+    "home": "https://github.com/marketplace/actions/erda-pipeline",
     "description": "A github action to run, query or stop Erda Pipelines"
 }

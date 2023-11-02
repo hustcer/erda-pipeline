@@ -28,7 +28,7 @@ All notable changes to this project will be documented in this file.
 
 - Add run erda pipeline by workflow support
 - Add query erda pipeline support
-- Add just task for runing and querying erda pipeline
+- Add just task for running and querying erda pipeline
 
 ### Refactor
 
