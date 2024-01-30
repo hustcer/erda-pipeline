@@ -12,7 +12,7 @@
 #   Change `version` in meta.json and then run: `just release` OR `just release true`
 
 export def 'make-release' [
-  --update-log(-u): bool    # Set to `true` do enable updating CHANGELOG.md
+  --update-log(-u)      # Add this flag to update CHANGELOG.md
 ] {
 
   cd $env.ERDA_PIPELINE_PATH

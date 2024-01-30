@@ -111,7 +111,7 @@ def format-pipeline-data [pipelines: list] {
   return (
     $pipelines
       | select -i id commit status normalLabels extra timeBegin timeUpdated filterLabels
-      | upsert id { $in | get-pipeline-url }
+      | upsert id {|it| $it | get-pipeline-url }
       | upsert timeBegin {|it| if ($it | get -i timeBegin | is-empty) { $NA } else { $it.timeBegin } }
       | update commit {|it| $it.commit | str substring 0..9 }
       | upsert Comment {|it| $it.normalLabels.commitDetail | from json | get -i comment | str trim }

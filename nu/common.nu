@@ -4,6 +4,18 @@
 # Usage:
 #   use source command to load it
 
+# Commonly used exit codes
+export const ECODE = {
+  SUCCESS: 0,
+  OUTDATED: 1,
+  MISSING_BINARY: 2,
+  MISSING_DEPENDENCY: 3,
+  CONDITION_NOT_SATISFIED: 5,
+  SERVER_ERROR: 6,
+  INVALID_PARAMETER: 7,
+  AUTH_FAILED: 8,
+}
+
 # If current host is Windows
 export def windows? [] {
   # Windows / Darwin
@@ -34,8 +46,8 @@ export def has-ref [
   if ($parse | is-empty) { false } else { true }
 }
 
-# Compare two version number, return `true` if first one is higher than second one,
-# Return `null` if they are equal, otherwise return `false`
+# Compare two version number, return `1` if first one is higher than second one,
+# Return `0` if they are equal, otherwise return `-1`
 export def compare-ver [
   from: string,
   to: string,
@@ -49,12 +61,12 @@ export def compare-ver [
     let c1 = ($v1 | get -i $v.index | default 0 | into int)
     let c2 = ($v2 | get -i $v.index | default 0 | into int)
     if $c1 > $c2 {
-      return true
+      return 1
     } else if ($c1 < $c2) {
-      return false
+      return (-1)
     }
   }
-  return null
+  return 0
 }
 
 # Compare two version number, return true if first one is lower then second one
@@ -62,7 +74,7 @@ export def is-lower-ver [
   from: string,
   to: string,
 ] {
-  (compare-ver $from $to) == false
+  (compare-ver $from $to) < 0
 }
 
 # Check if git was installed and if current directory is a git repo
