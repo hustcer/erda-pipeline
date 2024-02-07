@@ -1,6 +1,18 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.5] - 2024-02-07
+
+### Bug Fixes
+
+- Fix Nu module import path error
+- Fix release script
+
+### Deps
+
+- Upgrade actions/checkout, setup-nu and Nu version
+- Upgrade setup-nu and Nu version
+
 ## [1.3] - 2023-11-02
 
 ### Bug Fixes
