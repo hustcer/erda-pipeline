@@ -58,11 +58,11 @@ query:
     erda-query $args --auth $auth
 
 # Release a new version for `erda-pipeline`
-release updateLog=('false'):
+release *OPTIONS:
   @overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'common.nu') }}; \
     overlay use {{ join(ERDA_PIPELINE_PATH, 'nu', 'release.nu') }}; \
     git-check --check-repo=1 {{ERDA_PIPELINE_PATH}}; \
-    make-release --update-log {{updateLog}}
+    make-release {{OPTIONS}}
 
 # Plugins need to be registered only once after nu v0.61
 _setup:
