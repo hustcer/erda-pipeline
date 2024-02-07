@@ -264,7 +264,7 @@ export def main [
   operation: string,      # 目前支持两种操作类型，run 和 query, run 用于创建并执行 CICD, query 用于查询 CICD 执行结果
   pipeline?: record,      # 当操作为 run 时必须指定，用于指定流水线的配置信息
   --auth(-a): string,     # API调用的授权信息
-  --force(-f): bool,      # 当操作为 run 时生效，即便已经有正在运行的流水线或者已经部署过也会强制重新执行
+  --force(-f),            # 当操作为 run 时生效，即便已经有正在运行的流水线或者已经部署过也会强制重新执行
   --cid(-i): int,         # 当操作为 query 时生效，用于查询 CICD 执行结果，如果不传则查询最近 10 条流水线执行结果
 ] {
   check-envs
@@ -314,7 +314,7 @@ export def erda-deploy [
   --auth(-a): string,     # API调用的授权信息
   --force(-f),            # 即便已经有正在运行的流水线，或者即便该 Commit 对应的分支已经部署过也会强制重新部署
 ] {
-  main run $pipeline --force $force --auth $auth
+  main run $pipeline --force=$force --auth $auth
 }
 
 # 根据流水线 ID 或目标环境查询流水线执行结果, 例如: 单应用: t dq 997636681239659; t dq test, 多应用: t dq dev -a all
