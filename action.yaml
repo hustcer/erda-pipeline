@@ -42,7 +42,7 @@ runs:
     - name: Setup Nu
       uses: hustcer/setup-nu@v3.9
       with:
-        version: 0.90.1
+        version: 0.92.2
 
     - name: Setup Erda
       shell: nu {0}
