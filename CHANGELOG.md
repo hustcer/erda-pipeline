@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ### Deps
 
-- Upgrade actions/checkout and Nu to latest. Bumpt to v1.6
+- Upgrade `actions/checkout` and `Nu` to latest
 
 ## [1.5] - 2024-02-07
 
