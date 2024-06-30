@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.6] - 2024-06-30
+
+### Deps
+
+- Upgrade actions/checkout and Nu to latest. Bumpt to v1.6
+
 ## [1.5] - 2024-02-07
 
 ### Bug Fixes
