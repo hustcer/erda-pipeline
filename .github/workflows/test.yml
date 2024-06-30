@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v4.1.7
 
       - name: Run Erda Pipeline
-        uses: hustcer/erda-pipeline@v1.3
+        uses: hustcer/erda-pipeline@v1.6
         with:
           action: 'run'
           pid: 213
@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v4.1.7
 
       - name: Query Erda Pipeline
-        uses: hustcer/erda-pipeline@v1.3
+        uses: hustcer/erda-pipeline@v1.6
         with:
           action: 'query'
           pid: 213
