@@ -29,19 +29,6 @@ def should-retry [resp: any] {
   $isEmpty or $noAuth
 }
 
-# 根据分支名称推断目标环境是属于 DEV, TEST, STAGING 还是 PROD
-def get-env-from-branch [branch: string] {
-  let branch = $branch | str trim | str downcase
-  if $branch =~ 'hotfix/' { return 'DEV' }
-  if $branch =~ 'feature/' { return 'DEV' }
-  if $branch == 'develop' { return 'TEST' }
-  if $branch == 'master' { return 'PROD' }
-  if $branch =~ 'support/' { return 'PROD' }
-  if $branch =~ 'sprint/' { return 'STAGING' }
-  if $branch =~ 'release/' { return 'STAGING' }
-  return 'DEV'
-}
-
 # Check if the required environment variable was set, quit if not
 def check-envs [] {
   # 部署/查询 Pipeline 操作需要先配置 ERDA_USERNAME & ERDA_PASSWORD
@@ -142,7 +129,7 @@ def get-pipeline-url [--as-raw-string] {
 # 查询指定目标上最新的N条流水线执行结果
 def query-latest-cicd [pipeline: record, --auth: string, --show-running-detail] {
   let app = $pipeline
-  let environment = get-env-from-branch $app.branch
+  let environment = $app.environment
   check-envs
 
   print $'Querying latest CICDs for (ansi pb)($app.appName) on ($app.branch)(ansi reset) branch:'; hr-line -c pb
@@ -281,7 +268,7 @@ export def main [
       let appid = $app.appId
       let branch = $app.branch
       let appName = $app.appName
-      let environment = get-env-from-branch $branch
+      let environment = $app.environment
       # 检查是否有正在执行的流水线以及是否该 Commit 已经部署过
       if not $force {
         if not (check-cicd $appid $appName $branch $environment $app.pipeline --auth $auth) { return }

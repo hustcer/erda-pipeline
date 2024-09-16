@@ -31,6 +31,9 @@ inputs:
   branch:
     required: true
     description: 'The Erda branch name of the pipeline to handle.'
+  environment:
+    required: true
+    description: 'The Erda environment of the pipeline to handle, should be `DEV`, `TEST`, `STAGING` or `PROD`.'
   pipeline:
     required: true
     default: 'pipeline.yml'
@@ -42,7 +45,7 @@ runs:
     - name: Setup Nu
       uses: hustcer/setup-nu@v3
       with:
-        version: 0.95.0
+        version: 0.97.1
 
     - name: Setup Erda
       shell: nu {0}
@@ -57,12 +60,14 @@ runs:
         let branch = '${{ inputs.branch }}'
         let appName = '${{ inputs.app-name }}'
         let pipeline = '${{ inputs.pipeline }}'
+        let environment = '${{ inputs.environment }}'
         let erdaConfig = {
           pid: $pid,
           appId: $appId,
           branch: $branch,
           appName: $appName,
           pipeline: $pipeline,
+          environment: $environment
         }
         match $action {
           'query' => 'Querying Erda pipeline with the following config...',

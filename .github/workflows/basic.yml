@@ -15,7 +15,7 @@ jobs:
     name: Run fe-docs@feature/latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4
 
       - name: Run Erda Pipeline
         uses: hustcer/erda-pipeline@develop
@@ -23,6 +23,7 @@ jobs:
           action: 'run'
           pid: 213
           app-id: 7542
+          enviroment: 'DEV'
           app-name: 'Fe-Docs'
           branch: 'feature/latest'
           pipeline: 'pipeline.yml'
@@ -37,7 +38,7 @@ jobs:
     name: Query fe-docs@feature/latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4
 
       - name: Query Erda Pipeline
         uses: hustcer/erda-pipeline@develop
@@ -45,6 +46,7 @@ jobs:
           action: 'query'
           pid: 213
           app-id: 7542
+          enviroment: 'DEV'
           app-name: 'Fe-Docs'
           branch: 'feature/latest'
           pipeline: 'pipeline.yml'
