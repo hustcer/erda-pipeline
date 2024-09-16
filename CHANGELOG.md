@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.7] - 2024-09-16
+
+### Features
+
+- Add `environment` input support
+- Make v1 always point to the latest v1.x.x release
+
 ## [1.6] - 2024-06-30
 
 ### Deps
