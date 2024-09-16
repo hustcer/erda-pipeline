@@ -21,15 +21,16 @@ jobs:
     name: Run fe-docs@feature/latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.2
+        uses: actions/checkout@v4
 
       - name: Run Erda Pipeline
-        uses: hustcer/erda-pipeline@v1.3
+        uses: hustcer/erda-pipeline@v1
         with:
           action: "run" # 打算对流水线执行的操作目前可以为：run & query, 未来可能会添加 cancel 支持
           pid: 213 # Project ID，可以从应用的 URL 链接里面获取
           app-id: 7542 # App ID, 可以从应用的 URL 链接里面获取
           app-name: "Fe-Docs" # 应用名，这个名字可以自己随便定义，在流水线执行记录里面会打印出来，方便识别
+          environment: 'DEV'
           branch: "feature/latest" # 打算执行或者查询的流水线所在的分支
           pipeline: "pipeline.yml" # 打算执行或者查询的流水线文件, 比如：'.erda/pipelines/pc.yml' 等, 默认为 'pipeline.yml'
         env:
@@ -66,14 +67,15 @@ jobs:
     name: Run fe-docs@feature/latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.2
+        uses: actions/checkout@v4
 
       - name: Run Erda Pipeline
-        uses: hustcer/erda-pipeline@v1.3
+        uses: hustcer/erda-pipeline@v1
         with:
           action: "query" # 打算对流水线执行的操作目前可以为：run & query, 未来可能会添加 cancel 支持
           pid: 213 # Project ID，可以从应用的 URL 链接里面获取
           app-id: 7542 # App ID, 可以从应用的 URL 链接里面获取
+          environment: 'DEV'
           app-name: "Fe-Docs" # 应用名，这个名字可以自己随便定义，在流水线执行记录里面会打印出来，方便识别
           branch: "feature/latest" # 打算执行或者查询的流水线所在的分支
           pipeline: "pipeline.yml" # 打算执行或者查询的流水线文件, 比如：'.erda/pipelines/pc.yml' 等, 默认为 'pipeline.yml'
@@ -108,6 +110,7 @@ jobs:
 | `app-id`   | 是   | App ID, 可以从应用的 URL 链接里面获取                                              | string | -              |
 | `app-name` | 是   | 应用名，这个名字可以自己随便定义，在流水线执行记录里面会打印出来，方便识别         | string | -              |
 | `branch`   | 是   | 打算执行或者查询的流水线所在的分支                                                 | string | -              |
+| `environment` | 是 | `DEV`, `TEST`, `STAGING` or `PROD`                                      | string | -              |
 | `pipeline` | 是   | 打算执行或者查询的流水线文件, 比如：`.erda/pipelines/pc.yml` 等                    | string | `pipeline.yml` |
 
 ## 许可
