@@ -23,7 +23,7 @@ jobs:
           action: 'run'
           pid: 213
           app-id: 7542
-          enviroment: 'TEST'
+          environment: 'TEST'
           app-name: 'Fe-Docs'
           branch: 'develop'
           pipeline: 'pipeline.yml'
@@ -46,7 +46,7 @@ jobs:
           action: 'query'
           pid: 213
           app-id: 7542
-          enviroment: 'TEST'
+          environment: 'TEST'
           app-name: 'Fe-Docs'
           branch: 'develop'
           pipeline: 'pipeline.yml'
