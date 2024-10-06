@@ -33,12 +33,15 @@ jobs:
           ERDA_PASSWORD: ${{ secrets.ERDA_PASSWORD }}
 
   Query-Pipeline:
-    needs: Run-Pipeline
+    # needs: Run-Pipeline
     runs-on: ubuntu-latest
     name: Query fe-docs@feature/latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Sleep
+        run: sleep 5
 
       - name: Query Erda Pipeline
         uses: hustcer/erda-pipeline@develop
