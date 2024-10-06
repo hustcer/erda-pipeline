@@ -77,8 +77,8 @@ runs:
         } | print
         $erdaConfig | print
         match $action {
-          'run' => { erda-deploy $erdaConfig --auth $auth },
-          'query' => { erda-query $erdaConfig --auth $auth },
+          'run' => { erda-deploy $erdaConfig --auth $auth --watch },
+          'query' => { erda-query $erdaConfig --auth $auth --watch },
           _ => { print $'Unsupported action: ($action)' },
         }
 

@@ -99,7 +99,7 @@ export def git-check [
 }
 
 # Create a line by repeating the unit with specified times
-def build-line [
+export def build-line [
   times: int,
   unit: string = '-',
 ] {

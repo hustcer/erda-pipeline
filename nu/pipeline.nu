@@ -11,10 +11,11 @@
 #  [ ] 允许停止正在执行的流水线
 # Description: 创建 Erda 流水线并执行，同时可以查询流水线执行结果
 
-use common.nu [has-ref hr-line log]
+use common.nu [has-ref build-line hr-line log]
 
 const NA = 'N/A'
 const ERDA_HOST = 'https://erda.cloud'
+const PIPELINE_POLLING_INTERVAL = 3sec
 
 export-env {
   # $env.config.table.mode = 'light'
@@ -25,7 +26,7 @@ export-env {
 # 判断是否需要重试，如果返回 true 则重试，否则不重试
 def should-retry [resp: any] {
   let isEmpty = ($resp | is-empty)
-  let noAuth = ($resp | describe) == 'string' and ($resp =~ 'auth failed')
+  let noAuth = ($resp | describe) == 'string' and ($resp =~ 'auth failed' or $resp =~ 'Unauthorized')
   $isEmpty or $noAuth
 }
 
@@ -140,7 +141,7 @@ def query-latest-cicd [pipeline: record, --auth: string, --show-running-detail] 
   let pipelines = (format-pipeline-data $ci.data.pipelines)
   print ($pipelines | table -e)
   print 'URL of the latest pipeline:'; hr-line
-  print ($ci.data.pipelines | first | get-pipeline-url --as-raw-string)
+  print ($ci.data.pipelines | first | get-pipeline-url --as-raw-string | table -ew 150)
   print (char nl)
   if ($show_running_detail) {
     let running = $ci.data.pipelines | where status == 'Running'
@@ -199,7 +200,7 @@ def create-cicd [aid: int, appName: string, branch: string, pipeline: string, --
 }
 
 # 执行指定 ID 的流水线
-def run-cicd [id: int, appid: int, pid: int, --auth: string] {
+def run-cicd [id: int, appid: int, pid: int, --watch, --auth: string] {
   let runUrl = $'($ERDA_HOST)/api/terminus/cicds/($id)/actions/run'
   mut run = (curl --silent -H $auth -X POST $runUrl | from json)
   let url = $'($ERDA_HOST)/terminus/dop/projects/($pid)/apps/($appid)/pipeline/obsoleted?pipelineID=($id)'
@@ -211,10 +212,100 @@ def run-cicd [id: int, appid: int, pid: int, --auth: string] {
     print $'CICD started, You can query the pipeline running status with id: (ansi g)($id)(ansi reset)'
     print $'Or visit ($url) for more details'
   }
+  if $watch { watch-cicd-status $id }
+}
+
+# 根据流水线 ID 轮询流水线执行结果并显示, 轮询间隔为 2 秒
+export def watch-cicd-status [id: int] {
+  let auth = (get-auth)
+  let stages = polling-stage-status $id $auth
+  let total = $stages | length
+  const UNFINISHED_STATUS = [Born, Created, Analyzed, Queue, Running]
+  const FINISH_STATUS = [Success, Failed, StopByUser, NoNeedBySystem]
+  print $'(char nl)Pipeline Running Detail:'; hr-line
+
+  # pipelineTasks status: Created,Analyzed,Success,Queue,Running,Failed,StopByUser,NoNeedBySystem
+  for stage in ($stages | enumerate) {
+    let stageStatus = $stage.item.pipelineTasks | get status
+    let tasks = $stage.item.pipelineTasks | get name | str join ', '
+    let duration = $'($stage.item.pipelineTasks | get costTimeSec | math sum)sec' | into duration
+    let stageSuccess = $stageStatus | all {|it| $it == 'Success' }
+    let stageFailed = $stageStatus | any {|it| $it == 'Failed' }
+    let stageStopped = $stageStatus | any {|it| $it == 'StopByUser' }
+    let stageSkipped = $stageStatus | all {|it| $it == 'NoNeedBySystem' }
+    let stageUnfinished = $stageStatus | any {|it| $it in $UNFINISHED_STATUS }
+    let indicator = if $stageSuccess {
+        $'(ansi g)✓(ansi reset)  Stage: (ansi g)($tasks)(ansi reset) Finished Successfully! Time cost: ($duration)'
+      } else if $stageSkipped {
+        $'(ansi y)☕(ansi reset) Stage: (ansi y)($tasks)(ansi reset) Was skipped!' # 💥 💭 👻 💨 ☕
+      } else if $stageFailed {
+        $'(ansi y)⚠(ansi reset)  Stage: (ansi y)($tasks)(ansi reset) Failed! Time cost: ($duration)'
+      } else if $stageStopped {
+        $'(ansi y)👻(ansi reset) Stage: (ansi y)($tasks)(ansi reset) Was stopped! Time cost: ($duration)'
+      } else if $stageUnfinished {
+        $'(ansi pb)🪄(ansi reset) Stage: (ansi g)($tasks)(ansi reset) is Running...'
+      } else {
+        $'(ansi r)✗(ansi reset) Unknown Status: ($stageStatus | str join ",")'
+      }
+
+    $env.config.table.mode = 'psql'
+    print $'Stage ($stage.index + 1)/($total): ($indicator)'
+    mut counter = 0
+    mut keepPolling = $stageUnfinished
+    while $keepPolling {
+      $counter += 1
+      print (build-line $counter *)  # * 💤 👣 ✨ 🍵 ⚡ 🎉 🔹 🔸
+      if ($counter == 90) { $counter = 0; print -n (char nl) }
+      let pollingStages = polling-stage-status $id $auth --sid $stage.item.id
+      let tasks = $pollingStages | flatten | get pipelineTasks
+      let status = $tasks | get status
+      if ($status | any {|it| $it in $UNFINISHED_STATUS }) {
+        $keepPolling = true
+      } else {
+        $keepPolling = false
+        let duration = $'($tasks | get costTimeSec | math sum)sec' | into duration
+        print $'(char nl)Stage finished with status:(char nl)'
+        $tasks | select name status | rename Name Status | print
+        print $'(char nl)Time cost of this stage: ($duration)'
+        hr-line 60 -c grey66
+      }
+      sleep $PIPELINE_POLLING_INTERVAL
+    }
+  }
+  # Refresh the query result and print the final costTimeSec
+  let query = fetch-cicd-detail $id $auth
+  let totalTime = $'($query.data.costTimeSec)sec' | into duration
+  print $'(char nl)Pipeline run finished with status: (ansi p)($query.data.status)(ansi reset)! Total time cost: ($totalTime)'
+}
+
+# 查询流水线执行结果的相应阶段的详细信息
+def polling-stage-status [id: int, auth: string, --sid: int] {
+  let query = fetch-cicd-detail $id $auth
+  const PIPELINE_TASK_COLUMNS = [id name type status costTimeSec queueTimeSec timeBegin timeEnd extra]
+  # pipelineTasks status: Created,Success,Queue,Running,Failed,StopByUser
+  let stages = $query.data.pipelineStages
+    | select id pipelineTasks
+    | upsert pipelineTasks {|it| $it.pipelineTasks | select ...$PIPELINE_TASK_COLUMNS }
+  let stages = if not ($sid | is-empty) { $stages | where id == $sid } else { $stages }
+  $stages
+}
+
+# 查询流水线执行结果的详细信息
+export def fetch-cicd-detail [id: int, auth: string, --host: string = $ERDA_HOST] {
+  let queryUrl = $'($host)/api/terminus/pipelines/($id)'
+  mut query = (curl --silent -H $auth $queryUrl | from json)
+
+  # Check session expired, and renew if needed
+  loop {
+    if (should-retry $query) {
+      $query = (curl --silent -H $auth $queryUrl | from json)
+    } else { break }
+  }
+  $query
 }
 
 # 根据流水线 ID 查询流水线执行结果
-def query-cicd-by-id [id: int, --auth: string] {
+def query-cicd-by-id [id: int, --watch, --auth: string] {
   let queryUrl = $'($ERDA_HOST)/api/terminus/pipelines/($id)'
   mut query = (curl --silent -H $auth $queryUrl | from json)
 
@@ -244,12 +335,14 @@ def query-cicd-by-id [id: int, --auth: string] {
   print '----------------------------------------------------------'
   print $output
   # print ($query | table -e)     # Just for debugging purpose
+  if $watch { watch-cicd-status $id }
 }
 
 # 创建 Erda 流水线并执行，同时可以查询流水线执行结果
 export def main [
   operation: string,      # 目前支持两种操作类型，run 和 query, run 用于创建并执行 CICD, query 用于查询 CICD 执行结果
   pipeline?: record,      # 当操作为 run 时必须指定，用于指定流水线的配置信息
+  --watch(-w),            # 持续轮询并显示正在执行的流水线的详细信息
   --auth(-a): string,     # API调用的授权信息
   --force(-f),            # 当操作为 run 时生效，即便已经有正在运行的流水线或者已经部署过也会强制重新执行
   --cid(-i): int,         # 当操作为 query 时生效，用于查询 CICD 执行结果，如果不传则查询最近 10 条流水线执行结果
@@ -274,7 +367,7 @@ export def main [
         if not (check-cicd $appid $appName $branch $environment $app.pipeline --auth $auth) { return }
       }
       let cicdid = (create-cicd $appid $appName $branch $app.pipeline --auth $auth)
-      run-cicd ($cicdid | into int) $appid $pid --auth $auth
+      run-cicd ($cicdid | into int) $appid $pid --auth $auth --watch=$watch
 
     }
     query | q => {
@@ -286,7 +379,7 @@ export def main [
       if ($cid | describe) != 'int' {
         print $'Invalid value for --cid: (ansi r)($cid)(ansi reset), should be an integer number.'; exit 1
       }
-      query-cicd-by-id $cid --auth $auth
+      query-cicd-by-id $cid --auth $auth --watch=$watch
     }
     _ => {
       print $'Unsupported operation: (ansi r)($operation)(ansi reset), should be (ansi g)run(ansi reset) or (ansi g)query(ansi reset)'
@@ -298,18 +391,24 @@ export def main [
 # 创建 Erda 流水线并执行，默认情况下会检查是否有流水线正在执行或者是否该 Commit 已经部署过，若有则停止并给予提示
 export def erda-deploy [
   pipeline: record,       # 指定待执行的流水线的配置信息
+  --watch(-w),            # 执行流水线时持续轮询并显示该流水线各个 Stage 的详细执行信息
   --auth(-a): string,     # API调用的授权信息
   --force(-f),            # 即便已经有正在运行的流水线，或者即便该 Commit 对应的分支已经部署过也会强制重新部署
 ] {
-  main run $pipeline --force=$force --auth $auth
+  main run $pipeline --force=$force --auth $auth --watch=$watch
 }
 
 # 根据流水线 ID 或目标环境查询流水线执行结果, 例如: 单应用: t dq 997636681239659; t dq test, 多应用: t dq dev -a all
 export def erda-query [
   pipeline?: record,      # 指定待查询的流水线的配置信息
+  --watch(-w),            # 持续轮询并显示指定流水线各个 Stage 的详细执行信息
   --auth(-a): string,     # API调用的授权信息
   --cid(-i): any,         # 用于通过流水线的执行 ID 查询 CICD 执行结果，如果指定该参数则忽略 dest 参数
 ] {
   # 允许非指定流水线ID的查询
-  if ($cid | is-empty) { main query $pipeline --auth $auth } else { main query --cid $cid --auth $auth }
+  if ($cid | is-empty) {
+    main query $pipeline --auth $auth --watch=$watch
+  } else {
+    main query --cid $cid --auth $auth --watch=$watch
+  }
 }
