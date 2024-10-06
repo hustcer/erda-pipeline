@@ -128,7 +128,7 @@ def get-pipeline-url [--as-raw-string] {
 }
 
 # 查询指定目标上最新的N条流水线执行结果
-def query-latest-cicd [pipeline: record, --auth: string, --show-running-detail] {
+def query-latest-cicd [pipeline: record, --watch, --auth: string, --show-running-detail] {
   let app = $pipeline
   let environment = $app.environment
   check-envs
@@ -139,15 +139,15 @@ def query-latest-cicd [pipeline: record, --auth: string, --show-running-detail] 
     print $'No CICD found for (ansi pb)($app.appName)(ansi reset) on (ansi g)($app.branch)(ansi reset) branch'; exit 0
   }
   let pipelines = (format-pipeline-data $ci.data.pipelines)
-  print ($pipelines | table -e)
+  print ($pipelines | table -ew 150)
   print 'URL of the latest pipeline:'; hr-line
-  print ($ci.data.pipelines | first | get-pipeline-url --as-raw-string | table -ew 150)
+  print ($ci.data.pipelines | first | get-pipeline-url --as-raw-string)
   print (char nl)
   if ($show_running_detail) {
     let running = $ci.data.pipelines | where status == 'Running'
     if ($running | length) == 0 { return }
     print $'Detail of the running pipelines:'; hr-line
-    $running | get ID | each {|it| query-cicd-by-id $it --auth $auth }
+    $running | get ID | each {|it| query-cicd-by-id $it --auth $auth --watch=$watch }
   }
 }
 
@@ -374,7 +374,7 @@ export def main [
       # 未指定 cid 则查询最近 10 条流水线执行结果
       if ($cid | is-empty) {
         check-pipeline-conf $pipeline
-        query-latest-cicd $pipeline --auth $auth --show-running-detail; exit 0
+        query-latest-cicd $pipeline --auth $auth --watch=$watch --show-running-detail; exit 0
       }
       if ($cid | describe) != 'int' {
         print $'Invalid value for --cid: (ansi r)($cid)(ansi reset), should be an integer number.'; exit 1
