@@ -1,6 +1,24 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2024-10-06
+
+### Documentation
+
+- Update README.md
+
+### Features
+
+- Add watch pipeline running status support
+
+### Miscellaneous Tasks
+
+- Always use hustcer/erda-pipeline@v1
+
+### Deps
+
+- Upgrade Nu to v0.98.0 as the shell engine
+
 ## [1.7] - 2024-09-16
 
 ### Features
