@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] - 2024-10-06
+
+### Features
+
+- Add query and watch pipeline support
+
 ## [1.8.0] - 2024-10-06
 
 ### Documentation
