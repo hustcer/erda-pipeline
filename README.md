@@ -11,9 +11,10 @@
 ```yaml
 name: Run-Erda-Pipeline
 on:
+  workflow_dispatch:  # 手动触发执行流水线
   push:
     branches:
-      - develop # 设置 develop 分支 push 上去的时候自动执行流水线，在生成执行记录后可以根据情况决定是否启用
+      - develop # 设置 develop 分支 push 上去的时候自动执行流水线
 
 jobs:
   Run-Pipeline:
@@ -26,13 +27,13 @@ jobs:
       - name: Run Erda Pipeline
         uses: hustcer/erda-pipeline@v1
         with:
-          action: "run" # 打算对流水线执行的操作目前可以为：run & query, 未来可能会添加 cancel 支持
-          pid: 213 # Project ID，可以从应用的 URL 链接里面获取
-          app-id: 7542 # App ID, 可以从应用的 URL 链接里面获取
-          app-name: "Fe-Docs" # 应用名，这个名字可以自己随便定义，在流水线执行记录里面会打印出来，方便识别
-          environment: 'DEV'
-          branch: "feature/latest" # 打算执行或者查询的流水线所在的分支
-          pipeline: "pipeline.yml" # 打算执行或者查询的流水线文件, 比如：'.erda/pipelines/pc.yml' 等, 默认为 'pipeline.yml'
+          action: "run"   # 打算对流水线执行的操作目前可以为：run & query, 未来可能会添加 cancel 支持
+          pid: 213        # Project ID，可以从应用的 URL 链接里面获取
+          app-id: 7542    # App ID, 可以从应用的 URL 链接里面获取
+          app-name: "Fe-Docs"       # 应用名，这个名字可以自己随便定义，在流水线执行记录里面会打印出来，方便识别
+          environment: 'DEV'        # 对应分支所属的环境，可以为 `DEV`, `TEST`, `STAGING` or `PROD`
+          branch: "feature/latest"  # 打算执行或者查询的流水线所在的分支
+          pipeline: "pipeline.yml"  # 打算执行或者查询的流水线文件, 比如：'.erda/pipelines/pc.yml' 等, 默认为 'pipeline.yml'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ERDA_USERNAME: ${{ secrets.ERDA_USERNAME }} # Erda 登陆用户名
@@ -43,12 +44,10 @@ jobs:
 
 > **Important**
 >
-> 1. 想要该流水线顺利运行你需要在应用 Setting --> Secrets and variables --> Actions --> New repository secret 里面添加两个 Secrets
+>    想要该流水线顺利运行你需要在应用 Setting --> Secrets and variables --> Actions --> New repository secret 里面添加两个 Secrets
 >    命名分别为 `ERDA_USERNAME` & `ERDA_PASSWORD`, 并在其中填入 Erda 的登陆用户名和密码
-> 2. 初次需要将该流水线设置为分支 push 的时候自动触发生成一条执行记录，之后就可以在手机端选择该执行记录然后重复执行该 Workflow 了，虽然后续执行
->    的是同一条记录，但是由于 Nushell 脚本执行流水线的时候始终使用的是指定应用指定分支的最新代码所以不用担心 Erda 应用里最新代码没有生效的问题
 
-之后就可以在手机端通过 GitHub App 执行 Erda 的流水线了，执行结果可以查看 Github Action 的输出日志, [输出示例](https://github.com/hustcer/erda-pipeline/actions/runs/6695125684/job/18207644662)。
+之后就可以在手机端通过 GitHub App 执行 Erda 的流水线了，执行结果可以查看 Github Action 的输出日志。
 
 ### 查询流水线最近执行记录
 
@@ -57,9 +56,10 @@ jobs:
 ```yaml
 name: Query-Erda-Pipeline
 on:
+  workflow_dispatch:  # 手动触发执行流水线
   push:
     branches:
-      - develop # 设置 develop 分支 push 上去的时候自动执行流水线，在生成执行记录后可以根据情况决定是否启用
+      - develop # 设置 develop 分支 push 上去的时候自动执行流水线
 
 jobs:
   Run-Pipeline:
@@ -72,13 +72,13 @@ jobs:
       - name: Run Erda Pipeline
         uses: hustcer/erda-pipeline@v1
         with:
-          action: "query" # 打算对流水线执行的操作目前可以为：run & query, 未来可能会添加 cancel 支持
-          pid: 213 # Project ID，可以从应用的 URL 链接里面获取
-          app-id: 7542 # App ID, 可以从应用的 URL 链接里面获取
-          environment: 'DEV'
-          app-name: "Fe-Docs" # 应用名，这个名字可以自己随便定义，在流水线执行记录里面会打印出来，方便识别
-          branch: "feature/latest" # 打算执行或者查询的流水线所在的分支
-          pipeline: "pipeline.yml" # 打算执行或者查询的流水线文件, 比如：'.erda/pipelines/pc.yml' 等, 默认为 'pipeline.yml'
+          action: "query"   # 打算对流水线执行的操作目前可以为：run & query, 未来可能会添加 cancel 支持
+          pid: 213          # Project ID，可以从应用的 URL 链接里面获取
+          app-id: 7542      # App ID, 可以从应用的 URL 链接里面获取
+          environment: 'DEV'        # 对应分支所属的环境，可以为 `DEV`, `TEST`, `STAGING` or `PROD`
+          app-name: "Fe-Docs"       # 应用名，这个名字可以自己随便定义，在流水线执行记录里面会打印出来，方便识别
+          branch: "feature/latest"  # 打算执行或者查询的流水线所在的分支
+          pipeline: "pipeline.yml"  # 打算执行或者查询的流水线文件, 比如：'.erda/pipelines/pc.yml' 等, 默认为 'pipeline.yml'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ERDA_USERNAME: ${{ secrets.ERDA_USERNAME }} # Erda 登陆用户名
@@ -89,17 +89,16 @@ jobs:
 
 > **Important**
 >
-> 1. 想要该流水线顺利运行你需要在应用 Setting --> Secrets and variables --> Actions --> New repository secret 里面添加两个 Secrets
+>    想要该流水线顺利运行你需要在应用 Setting --> Secrets and variables --> Actions --> New repository secret 里面添加两个 Secrets
 >    命名分别为 `ERDA_USERNAME` & `ERDA_PASSWORD`, 并在其中填入 Erda 的登陆用户名和密码
-> 2. 初次需要将该流水线设置为分支 push 的时候自动触发生成一条执行记录，之后就可以在手机端选择该执行记录然后重复执行该 Workflow 了
 
-之后就可以在手机端通过 GitHub App 查询 Erda 的流水线的最近执行记录了，查询结果可以查看 Github Action 的输出日志, [输出示例](https://github.com/hustcer/erda-pipeline/actions/runs/6695125684/job/18207651324)。
+之后就可以在手机端通过 GitHub App 查询 Erda 的流水线的最近执行记录了，查询结果可以查看 Github Action 的输出日志。
 
 ### 友情提示
 
 1. 你的代码仓库里面只需要有相应的 Github Workflow 即可，不需要将此仓库的脚本等加入进去；
-2. 示例中的代码 checkout 步骤通过 `uses: actions/checkout@v4.1.2` 完成，不过这仅适用于可公开访问的仓库，对于私有仓库需要指定仓库及私钥，参考[这里说明](https://github.com/actions/checkout#checkout-multiple-repos-private)；
-3. 建议在一个 Workflow 里面同时加入执行和查询的 Job，这样只需要一个流水线即可完成两个操作，虽然 Erda 流水线的执行是异步的，查询的时候可能 Erda 流水线尚未结束，但是 Github App 允许你单独启动指定的 Job，你可以在稍后重新单独执行下查询 Job 即可查看流水线的最新执行情况；
+2. 示例中的代码 checkout 步骤通过 `uses: actions/checkout@v4` 完成，不过这仅适用于可公开访问的仓库，对于私有仓库需要指定仓库及私钥，参考[这里说明](https://github.com/actions/checkout#checkout-multiple-repos-private)；
+3. 建议在一个 Workflow 里面同时加入执行和查询的 Job，这样只需要一个流水线即可完成两个操作；
 
 ### 输入
 

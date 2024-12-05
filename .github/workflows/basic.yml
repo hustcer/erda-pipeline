@@ -5,6 +5,7 @@
 
 name: Test-Erda-Pipeline@DEV
 on:
+  workflow_dispatch:
   push:
     branches:
       - develop
