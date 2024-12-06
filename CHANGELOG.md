@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.10.0] - 2024-12-06
+
+### Miscellaneous Tasks
+
+- Upgrade `Nushell` to v0.100
+
 ## [1.9.0] - 2024-10-06
 
 ### Features
