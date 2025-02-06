@@ -1,7 +1,7 @@
 {
     "name": "Erda-Pipeline",
-    "version": "1.10.0",
-    "actionVer": "v1.10",
+    "version": "1.11.0",
+    "actionVer": "v1.11",
     "author": "hustcer",
     "license": "MIT",
     "github": "https://github.com/hustcer/erda-pipeline",

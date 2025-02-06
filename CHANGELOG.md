@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.11.0] - 2025-02-06
+
+### Deps
+
+- Upgrade Nushell to v0.102, refactor `compare-ver` common util
+
 ## [1.10.0] - 2024-12-06
 
 ### Miscellaneous Tasks
