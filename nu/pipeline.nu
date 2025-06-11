@@ -147,7 +147,7 @@ def query-latest-cicd [pipeline: record, --watch, --auth: string, --show-running
     let running = $ci.data.pipelines | where status == 'Running'
     if ($running | length) == 0 { return }
     print $'Detail of the running pipelines:'; hr-line
-    $running | get ID | each {|it| query-cicd-by-id $it --auth $auth --watch=$watch }
+    $running | get id | each {|it| query-cicd-by-id $it --auth $auth --watch=$watch }
   }
 }
 
