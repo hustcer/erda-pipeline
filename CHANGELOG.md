@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.12.0] - 2025-06-11
+
+### Deps
+
+- Upgrade Nushell to v0.105
+
 ## [1.11.0] - 2025-02-06
 
 ### Deps
