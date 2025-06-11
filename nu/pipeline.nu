@@ -34,7 +34,7 @@ def should-retry [resp: any] {
 def check-envs [] {
   # 部署/查询 Pipeline 操作需要先配置 ERDA_USERNAME & ERDA_PASSWORD
   let envs = ['ERDA_USERNAME' 'ERDA_PASSWORD']
-  let empties = ($envs | filter {|it| $env | get -i $it | is-empty })
+  let empties = ($envs | where {|it| $env | get -i $it | is-empty })
   if ($empties | length) > 0 {
     print $'Please set (ansi r)($empties | str join ',')(ansi reset) in your environment first...'
     exit 5
@@ -60,7 +60,7 @@ export def get-auth [] {
 def check-pipeline-conf [conf: any] {
   let keys = ['pid', 'appId', 'branch', 'appName', 'pipeline']
 
-  let empties = ($keys | filter {|it| $conf | get -i $it | is-empty })
+  let empties = ($keys | where {|it| $conf | get -i $it | is-empty })
   if ($empties | length) > 0 {
     print $'Please set (ansi r)($empties | str join ',')(ansi reset) in the following pipeline config:'
     print $conf; exit 1
