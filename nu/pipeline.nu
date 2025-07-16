@@ -34,7 +34,7 @@ def should-retry [resp: any] {
 def check-envs [] {
   # 部署/查询 Pipeline 操作需要先配置 ERDA_USERNAME & ERDA_PASSWORD
   let envs = ['ERDA_USERNAME' 'ERDA_PASSWORD']
-  let empties = ($envs | where {|it| $env | get -i $it | is-empty })
+  let empties = ($envs | where {|it| $env | get -o $it | is-empty })
   if ($empties | length) > 0 {
     print $'Please set (ansi r)($empties | str join ',')(ansi reset) in your environment first...'
     exit 5
@@ -60,7 +60,7 @@ export def get-auth [] {
 def check-pipeline-conf [conf: any] {
   let keys = ['pid', 'appId', 'branch', 'appName', 'pipeline']
 
-  let empties = ($keys | where {|it| $conf | get -i $it | is-empty })
+  let empties = ($keys | where {|it| $conf | get -o $it | is-empty })
   if ($empties | length) > 0 {
     print $'Please set (ansi r)($empties | str join ',')(ansi reset) in the following pipeline config:'
     print $conf; exit 1
@@ -98,14 +98,14 @@ def query-cicd [aid: int, appName: string, branch: string, erdaEnv: string, pipe
 def format-pipeline-data [pipelines: list] {
   return (
     $pipelines
-      | select -i id commit status normalLabels extra timeBegin timeUpdated filterLabels
+      | select -o id commit status normalLabels extra timeBegin timeUpdated filterLabels
       | upsert id {|it| $it | get-pipeline-url }
-      | upsert timeBegin {|it| if ($it | get -i timeBegin | is-empty) { $NA } else { $it.timeBegin } }
+      | upsert timeBegin {|it| if ($it | get -o timeBegin | is-empty) { $NA } else { $it.timeBegin } }
       | update commit {|it| $it.commit | str substring 0..9 }
-      | upsert Comment {|it| $it.normalLabels.commitDetail | from json | get -i comment | str trim }
-      | upsert Author {|it| $it.normalLabels.commitDetail | from json | get -i author }
+      | upsert Comment {|it| $it.normalLabels.commitDetail | from json | get -o comment | str trim }
+      | upsert Author {|it| $it.normalLabels.commitDetail | from json | get -o author }
       | update status {|it| $'(ansi pb)($it.status)(ansi reset)' }
-      | upsert Runner {|it| $it.extra | get -i runUser | default {name: $NA} | get name }
+      | upsert Runner {|it| $it.extra | get -o runUser | default {name: $NA} | get name }
       | upsert Begin {|it| if $it.timeBegin == $NA { $it.timeBegin } else { $it.timeBegin | into datetime | date humanize } }
       | upsert Updated {|it| $it.timeUpdated | into datetime | date humanize }
       | reject extra timeBegin timeUpdated normalLabels filterLabels
