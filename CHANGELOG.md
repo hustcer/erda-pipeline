@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.13.0] - 2025-07-26
+
+### Bug Fixes
+
+- Fix just tasks for Nu 0.106
+- Fix for Nu 0.106 and later versions
+
 ## [1.12.0] - 2025-06-11
 
 ### Deps
