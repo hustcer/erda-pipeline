@@ -16,7 +16,7 @@ jobs:
     name: Run fe-docs@develop
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Run Erda Pipeline
         uses: hustcer/erda-pipeline@v1
@@ -39,7 +39,7 @@ jobs:
     name: Query fe-docs@develop
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Query Erda Pipeline
         uses: hustcer/erda-pipeline@v1

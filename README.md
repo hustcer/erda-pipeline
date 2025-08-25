@@ -22,7 +22,7 @@ jobs:
     name: Run fe-docs@feature/latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Run Erda Pipeline
         uses: hustcer/erda-pipeline@v1
@@ -67,7 +67,7 @@ jobs:
     name: Run fe-docs@feature/latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Run Erda Pipeline
         uses: hustcer/erda-pipeline@v1
@@ -97,7 +97,7 @@ jobs:
 ### 友情提示
 
 1. 你的代码仓库里面只需要有相应的 Github Workflow 即可，不需要将此仓库的脚本等加入进去；
-2. 示例中的代码 checkout 步骤通过 `uses: actions/checkout@v4` 完成，不过这仅适用于可公开访问的仓库，对于私有仓库需要指定仓库及私钥，参考[这里说明](https://github.com/actions/checkout#checkout-multiple-repos-private)；
+2. 示例中的代码 checkout 步骤通过 `uses: actions/checkout@v5` 完成，不过这仅适用于可公开访问的仓库，对于私有仓库需要指定仓库及私钥，参考[这里说明](https://github.com/actions/checkout#checkout-multiple-repos-private)；
 3. 建议在一个 Workflow 里面同时加入执行和查询的 Job，这样只需要一个流水线即可完成两个操作；
 
 ### 输入
