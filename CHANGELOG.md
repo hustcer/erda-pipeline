@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [1.15.0] - 2025-10-25
+
+### Deps
+
+- Upgrade to `actions/checkout` to `v5`
+- Upgrade Nushell to v0.107.0
+- Upgrade nushell to v0.108.0
+
 ## [1.13.0] - 2025-07-26
 
 ### Bug Fixes
